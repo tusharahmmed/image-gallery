@@ -1,26 +1,58 @@
-import {useState} from "react";
+import {useSortable} from "@dnd-kit/sortable";
+import {useDispatch} from "react-redux";
+import {toggleSelectImage} from "../rtk/features/gallery/gallerySlice";
+import {useSelector} from "react-redux";
 
 /* eslint-disable react/prop-types */
-const Image = ({data}) => {
-  const [selected, setSelected] = useState(false);
-  // console.log(selected);
+const Image = ({item, index}) => {
+  const {selectedImages} = useSelector((state) => state.gallery) || [];
+
+  // action dispatcher
+  const dispatch = useDispatch();
+
+  const selectHandler = () => {
+    dispatch(toggleSelectImage(item?.id));
+  };
+
+  // dnd-kit
+  const {attributes, listeners, setNodeRef, transform, transition} =
+    useSortable({
+      id: item.id,
+    });
 
   return (
-    <div className={`relative group border-2 rounded-lg`}>
-      <img className="" src={data?.src} alt="" />
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: transform
+          ? `translate(${transform.x}px, ${transform.y}px)`
+          : undefined,
+        transition: transition ? "transform 250ms" : undefined,
+      }}
+      className={` ${
+        index === 0 && `col-span-2 row-span-2`
+      } relative group border-2 rounded-lg h-full`}>
       <div
-        className={`${
-          selected ? "bg-[#f8f9f994] opacity-90" : ""
-        } opacity-0 absolute top-0 left-0 right-0 bottom-0 group-hover:bg-[#82828295] group-hover:opacity-90 duration-300`}>
-        <div className="p-4">
-          <input
-            onClick={() => setSelected(!selected)}
-            type="checkbox"
-            className={`${
-              selected ? "bg-[#f8f9f994] opacity-90" : ""
-            } w-6 h-6 opacity-0 group-hover:opacity-90 duration-300`}
-          />
-        </div>
+        {...attributes}
+        {...listeners}
+        className="group-hover:bg-[#82828295] h-full">
+        <img className="h-full" src={item?.src} alt="" />
+        <span
+          className={`${
+            selectedImages.includes(item.id) ? "bg-[#f8f9f994] opacity-90" : ""
+          } opacity-0 absolute top-0 left-0 right-0 bottom-0 group-hover:bg-[#82828295] group-hover:opacity-90 duration-300`}></span>
+      </div>
+
+      {/* action bar */}
+      <div className="absolute top-0 left-0 p-4">
+        <input
+          onChange={selectHandler}
+          checked={selectedImages.includes(item.id)}
+          type="checkbox"
+          className={`${
+            selectedImages.includes(item.id) ? "bg-[#f8f9f994] opacity-90" : ""
+          } w-6 h-6 opacity-0 group-hover:opacity-90 duration-300 `}
+        />
       </div>
     </div>
   );

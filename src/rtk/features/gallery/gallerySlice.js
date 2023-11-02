@@ -50,10 +50,17 @@ export const gallerySlice = createSlice({
         state.selectedImages.push(id);
       }
     },
+    removeImage: (state, action) => {
+      state.uploadedImages = state.uploadedImages.filter(
+        (item) => item.id !== action.payload
+      );
+      state.selectedImages = [];
+    },
   },
 });
 
-// Action creators are generated for each case reducer function
-export const {upload, sortImages, toggleSelectImage} = gallerySlice.actions;
+// export actions
+export const {upload, sortImages, toggleSelectImage, removeImage} =
+  gallerySlice.actions;
 
 export const galleryReducer = gallerySlice.reducer;

@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// import { useState} from "react";
 import {
   DndContext,
   closestCenter,
@@ -11,7 +10,6 @@ import {
 import {
   SortableContext,
   rectSortingStrategy,
-  useSortable,
   arrayMove,
 } from "@dnd-kit/sortable";
 
@@ -19,16 +17,17 @@ import Image from "../ui/Image";
 import FileUpload from "../ui/FileUpload";
 import {useSelector} from "react-redux";
 import {useDispatch} from "react-redux";
-import {sortImages} from "../rtk/features/gallery/gallerySlice";
+import {removeImage, sortImages} from "../rtk/features/gallery/gallerySlice";
+import {getText} from "../utils/getText";
 
 const ImageGallery = () => {
-  // const [selectedItems, setSelectedItems] = useState([]);
-
   const {uploadedImages: items} = useSelector((state) => state.gallery) || [];
-  console.log(items);
+
+  const {selectedImages} = useSelector((state) => state.gallery) || [];
 
   const dispatch = useDispatch();
 
+  // dnd kit
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
@@ -48,48 +47,51 @@ const ImageGallery = () => {
     }
   };
 
+  // remove images handler
+  const deleteHandler = () => {
+    selectedImages.forEach((id) => {
+      dispatch(removeImage(id));
+    });
+  };
+
   return (
     <div className="w-11/12 bg-white rounded-lg">
-      <div className="flex items-center justify-between px-6 py-3 border-b-2">
-        <h3 className="text-lg font-medium">Gallery</h3>
-        <button className="text-red-500 font-medium">Delete file</button>
+      <div className="h-[60px] flex items-center justify-between px-6 py-3 border-b-2">
+        <h3 className="text-lg font-medium">
+          {selectedImages?.length > 0 ? (
+            <div className="flex items-center">
+              <img
+                width={22}
+                className="bg-blue-500 mr-2"
+                src={"icon/checkbox.png"}
+                alt=""
+              />
+              {getText("File", "Files", selectedImages?.length)} Selected
+            </div>
+          ) : (
+            "Gallery"
+          )}
+        </h3>
+        {selectedImages?.length > 0 && (
+          <button onClick={deleteHandler} className="text-red-500 font-medium">
+            Delete file
+          </button>
+        )}
       </div>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}>
         <SortableContext items={items} strategy={strategy}>
-          <div className={`grid grid-cols-5 gap-5 px-6 py-3`}>
-            {items?.map((item, index) => (
-              <SortableImage key={item.id} item={item} index={index} />
-            ))}
+          <div className={`grid grid-cols-2 lg:grid-cols-5 gap-5 px-6 py-3`}>
+            {items.map((item, index) => {
+              return <Image index={index} key={item.id} item={item} />;
+            })}
+
             <FileUpload fileState={items} maxNumber={9} />
           </div>
         </SortableContext>
       </DndContext>
-    </div>
-  );
-};
-
-const SortableImage = ({item, index}) => {
-  const {attributes, listeners, setNodeRef, transform, transition} =
-    useSortable({
-      id: item.id,
-    });
-
-  return (
-    <div
-      className={` ${index === 0 && `col-span-2 row-span-2`}`}
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{
-        transform: transform
-          ? `translate(${transform.x}px, ${transform.y}px)`
-          : undefined,
-        transition: transition ? "transform 250ms" : undefined,
-      }}>
-      <Image data={item} />
     </div>
   );
 };

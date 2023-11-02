@@ -1,15 +1,12 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 
-import React, {useCallback, useState} from "react";
+import {useCallback} from "react";
 import {useDropzone} from "react-dropzone";
 import {useDispatch} from "react-redux";
 import {upload} from "../rtk/features/gallery/gallerySlice";
 
 const FileUpload = ({maxNumber}) => {
   const dispatch = useDispatch();
-
-  const [uploadError, setUploadError] = useState("");
 
   // accepted file types
   const acceptedFiles = {
@@ -20,10 +17,6 @@ const FileUpload = ({maxNumber}) => {
 
   // handle img drop
   const onDrop = useCallback((acceptedFiles, rejectFiles) => {
-    // clear state
-    // setFileState((prevFiles) => [...prevFiles]);
-    setUploadError("");
-
     if (acceptedFiles.length > 0) {
       acceptedFiles.forEach((file) => {
         const reader = new FileReader();
@@ -36,7 +29,6 @@ const FileUpload = ({maxNumber}) => {
           };
           // update state
           dispatch(upload(uploadedFile));
-          // setFileState((prevFileState) => [...prevFileState, uploadedFile]);
         };
         reader.readAsDataURL(file);
       });
@@ -44,8 +36,7 @@ const FileUpload = ({maxNumber}) => {
 
     // if have rejected file
     if (rejectFiles.length > 0) {
-      let errorMessage = rejectFiles[0].errors[0].message;
-      setUploadError(errorMessage);
+      // let errorMessage = rejectFiles[0].errors[0].message;
     }
   }, []);
 
