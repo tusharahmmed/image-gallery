@@ -15,10 +15,19 @@ const Image = ({item, index}) => {
   };
 
   // dnd-kit
-  const {attributes, listeners, setNodeRef, transform, transition} =
-    useSortable({
-      id: item.id,
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    newIndex,
+    overIndex,
+    active,
+  } = useSortable({
+    id: item.id,
+  });
 
   return (
     <div
@@ -29,9 +38,15 @@ const Image = ({item, index}) => {
           : undefined,
         transition: transition ? "transform 250ms" : undefined,
       }}
-      className={` ${
-        index === 0 && `col-span-2 row-span-2`
-      } relative group border-2 rounded-lg h-full`}>
+      className={`relative group border-2 rounded-lg h-full
+       ${index === 0 && !isDragging && `col-span-2 row-span-2`} 
+       ${isDragging && index == 0 && `col-span-1 row-span-1`}
+       ${
+         overIndex === 0 && newIndex == 0 && active?.id !== item?.id
+           ? "col-span-2 row-span-2"
+           : "col-span-1 row-span-1"
+       }
+       ${overIndex !== 0 ? "col-span-1 row-span-1" : "col-span-1 row-span-1"}`}>
       <div
         {...attributes}
         {...listeners}
